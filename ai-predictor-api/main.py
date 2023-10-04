@@ -7,9 +7,6 @@ import boto3
 
 client = boto3.client('sagemaker-runtime')
 
-
-
-
 app = FastAPI(
     title="Raise AI API"
 )
