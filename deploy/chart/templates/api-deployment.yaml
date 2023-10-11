@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-{{ .Values.deploymentName }}
+  labels:
+    app: {{ .Chart.Name }}-{{ .Values.deploymentName }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}-{{ .Values.deploymentName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-{{ .Values.deploymentName }}
+    spec:
+      serviceAccountName: raise-ai-spikes
+      containers:
+        - name: {{ .Chart.Name }}-{{ .Values.deploymentName }}
+          image: {{ .Values.apiImage.name }}:{{ .Values.apiImage.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
