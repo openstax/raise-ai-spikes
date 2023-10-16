@@ -27,17 +27,17 @@
     </div>
     <script>
         function predict() {
-            var input = document.getElementById("input").value;
-            var labels = document.getElementById("labels").value.split(",").map(label => label.trim());
-            var multiLabel = document.getElementById("multilabel").value === "true";
+            let input = document.getElementById("input").value;
+            let labels = document.getElementById("labels").value.split(",").map(label => label.trim());
+            let multiLabel = document.getElementById("multilabel").value === "true";
 
-            var data = {
+            let data = {
                 "input": input,
                 "labels": labels,
                 "multi_label": multiLabel
             };
 
-            fetch("http://localhost:5000/predict", {
+            fetch("https://ai-predictor-api.raise.openstax.org/predict/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -46,10 +46,17 @@
             })
             .then(response => response.json())
             .then(data => {
-                var resultsDiv = document.getElementById("results");
+                let transformedData = data.labels.map((label, index) => {
+                    return {
+                        "label": label,
+                        "score": data.scores[index]
+                    };
+                });
+
+                let resultsDiv = document.getElementById("results");
                 resultsDiv.innerHTML = "";
-                data.forEach(item => {
-                    var labelDiv = document.createElement("div");
+                transformedData.forEach(item => {
+                    let labelDiv = document.createElement("div");
                     labelDiv.textContent = "Label: " + item.label + ", Score: " + item.score;
                     resultsDiv.appendChild(labelDiv);
                 });
