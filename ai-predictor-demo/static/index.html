@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Predictor</title>
+</head>
+<body>
+    <div style="max-width: 400px; margin: 0 auto; padding: 20px; text-align: center;">
+        <h1 style="margin-bottom: 20px;">AI Predictor</h1>
+        <div style="margin-bottom: 20px;">
+            <label for="input">Input string:</label><br>
+            <input type="text" id="input" style="width: 100%; padding: 10px; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label for="labels">Labels (comma separated list):</label><br>
+            <input type="text" id="labels" style="width: 100%; padding: 10px; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label for="multilabel">Multi Label:</label><br>
+            <select id="multilabel">
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </select>
+        </div>
+        <button onclick="predict()" style="background-color: #1d6020; color: white; padding: 14px 20px;">Predict</button>
+        <div id="results" style="margin-top: 20px; text-align: left;"></div>
+    </div>
+    <script>
+        function predict() {
+            let input = document.getElementById("input").value;
+            let labels = document.getElementById("labels").value.split(",").map(label => label.trim());
+            let multiLabel = document.getElementById("multilabel").value === "true";
+
+            let data = {
+                "input": input,
+                "labels": labels,
+                "multi_label": multiLabel
+            };
+
+            fetch("https://ai-predictor-api.raise.openstax.org/predict/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                let transformedData = data.labels.map((label, index) => {
+                    return {
+                        "label": label,
+                        "score": data.scores[index]
+                    };
+                });
+
+                let resultsDiv = document.getElementById("results");
+                resultsDiv.innerHTML = "";
+                transformedData.forEach(item => {
+                    let labelDiv = document.createElement("div");
+                    labelDiv.textContent = "Label: " + item.label + ", Score: " + item.score;
+                    resultsDiv.appendChild(labelDiv);
+                });
+            })
+        }
+    </script>
+</body>
+</html>
