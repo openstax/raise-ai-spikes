@@ -1,0 +1,13 @@
+services:
+  resourcematch-app:
+    build:
+      context: ./resourcematch-app
+    volumes:
+      - ./resourcematch-app:/code
+      - /code/node_modules
+    ports:
+      - 3000:3000
+    networks:
+      - resourcematch
+networks:
+  resourcematch:
