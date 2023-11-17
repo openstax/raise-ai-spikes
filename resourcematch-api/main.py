@@ -5,6 +5,31 @@ from typing import List, Literal
 import aiohttp
 import asyncio
 
+BOOKS_BY_SLUG = {
+        "college-algebra-corequisite-support-2e": {
+            "uuid": "32bee6a",
+            "code_version": "20230828.164620",
+            "book_version": "59024a63-2b1a-4631-94c5-ae275a77b587"
+        },
+        "world-history-volume-2": {
+            "uuid": "685e3163-1032-4529-bb3a-f97a54412704",
+            "code_version": "20230828.164620",
+            "book_version": "244d248"
+        },
+        "us-history": {
+            "uuid": "a7ba2fb8-8925-4987-b182-5f4429d48daa",
+            "code_version": "20230828.164620",
+            "book_version": "59e152a"
+        },
+
+        "biology-2e": {
+            "uuid": "8d50a0af-948b-4204-a71d-4826cba765b8",
+            "code_version": "20230828.164620",
+            "book_version": "3bf8607"
+        }
+    }
+
+
 app = FastAPI(
     title="Resource Match API"
 )
@@ -32,33 +57,9 @@ class MatchResponse(BaseModel):
 
 
 async def process_search_queries(search_queries, books):
-    books_by_slug = {
-        "college-algebra-corequisite-support-2e": {
-            "uuid": "32bee6a",
-            "code_version": "20230828.164620",
-            "book_version": "59024a63-2b1a-4631-94c5-ae275a77b587"
-        },
-        "world-history-volume-2": {
-            "uuid": "685e3163-1032-4529-bb3a-f97a54412704",
-            "code_version": "20230828.164620",
-            "book_version": "244d248"
-        },
-        "us-history": {
-            "uuid": "a7ba2fb8-8925-4987-b182-5f4429d48daa",
-            "code_version": "20230828.164620",
-            "book_version": "59e152a"
-        },
-
-        "biology-2e": {
-            "uuid": "8d50a0af-948b-4204-a71d-4826cba765b8",
-            "code_version": "20230828.164620",
-            "book_version": "3bf8607"
-        }
-    }
-
     async with aiohttp.ClientSession() as session:
         first_book_slug = books[0]
-        book_data = books_by_slug[first_book_slug]
+        book_data = BOOKS_BY_SLUG[first_book_slug]
         previously_used_queries = {}
         aggregate_search_results = []
 
