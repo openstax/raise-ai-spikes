@@ -71,14 +71,26 @@ async def process_search_queries(search_queries, books):
                    f'&books={book_data['code_version']}/{book_data['uuid']}'
                    f'@{book_data['book_version']}'
                    f'&index_strategy=i1&search_strategy=s1')
-            async with session.get(url) as resp:
-                search_response = await resp.json()
-                search_info = {
-                    "book": first_book_slug,
-                    "search_query": query,
-                    "search_response": search_response
-                }
-                aggregate_search_results.append(search_info)
+            try:
+                async with session.get(url) as resp:
+                    resp.raise_for_status()
+                    if resp.status == 200:
+                        search_response = await resp.json()
+                        search_info = {
+                            "book": first_book_slug,
+                            "search_query": query,
+                            "search_response": search_response
+                        }
+                        aggregate_search_results.append(search_info)
+            except aiohttp.ClientResponseError as exception:
+                status = exception.status
+                message = exception.message
+                url = exception.args[0].url
+                print({
+                    'status': status,
+                    'message': message,
+                    'url': url
+                })
         return aggregate_search_results
 
 
