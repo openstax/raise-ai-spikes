@@ -2,6 +2,37 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import AnyHttpUrl, BaseModel
 from typing import List, Literal
+import aiohttp
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+BOOKS_BY_SLUG = {
+        "college-algebra-corequisite-support-2e": {
+            "uuid": "59024a63-2b1a-4631-94c5-ae275a77b587",
+            "code_version": "20230828.164620",
+            "book_version": "32bee6a"
+        },
+        "world-history-volume-2": {
+            "uuid": "685e3163-1032-4529-bb3a-f97a54412704",
+            "code_version": "20230828.164620",
+            "book_version": "244d248"
+        },
+        "us-history": {
+            "uuid": "a7ba2fb8-8925-4987-b182-5f4429d48daa",
+            "code_version": "20230828.164620",
+            "book_version": "59e152a"
+        },
+
+        "biology-2e": {
+            "uuid": "8d50a0af-948b-4204-a71d-4826cba765b8",
+            "code_version": "20230828.164620",
+            "book_version": "3bf8607"
+        }
+    }
+SEARCH_API_BASE_URL = "https://openstax.org/open-search/api/v0"
+
 
 app = FastAPI(
     title="Resource Match API"
@@ -27,6 +58,42 @@ class MatchRequest(BaseModel):
 
 class MatchResponse(BaseModel):
     urls: List[AnyHttpUrl]
+
+
+async def process_search_queries(search_queries, books):
+    async with aiohttp.ClientSession() as session:
+        first_book_slug = books[0]
+        book_data = BOOKS_BY_SLUG[first_book_slug]
+        unique_search_queries = set(search_queries)
+        aggregate_search_results = []
+
+        for query in unique_search_queries:
+            params = {
+                "q": query,
+                "books": (f"{book_data['code_version']}/{book_data['uuid']}"
+                          f"@{book_data['book_version']}"),
+                "index_strategy": "i1",
+                "search_strategy": "s1"
+            }
+            try:
+                async with session.get(
+                        f"{SEARCH_API_BASE_URL}/search",
+                        params=params) as resp:
+                    resp.raise_for_status()
+                    search_response = await resp.json()
+                    search_info = {
+                        "book": first_book_slug,
+                        "search_query": query,
+                        "search_response": search_response
+                    }
+                    aggregate_search_results.append(search_info)
+            except aiohttp.ClientResponseError as exception:
+                logger.error(
+                    'Error processing request: %s',
+                    exception,
+                    exc_info=True)
+
+        return aggregate_search_results
 
 
 @app.post("/match")
