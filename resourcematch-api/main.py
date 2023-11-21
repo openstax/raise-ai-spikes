@@ -96,6 +96,37 @@ async def process_search_queries(search_queries, books):
         return aggregate_search_results
 
 
+async def search_responses_to_urls(search_responses):
+    # Loop through the search_responses to obtain book information and the list of hits
+    async with aiohttp.ClientSession() as session:
+        ordered_urls = []
+        for response in search_responses:
+            book_data = BOOKS_BY_SLUG[response['book']]
+            book_uuid = book_data['uuid']
+            search_query = response['search_query']
+            response_hits = response['search_response']['hits']['hits']
+            # Loop through each hit to get the information necessary to make GET request
+            for hit in response_hits:
+                search_score = hit['_score']
+                page_uuid = hit['_source']['page_id']
+                fixed_page_uuid = page_uuid.partition('@')[0]
+                element_uuid = hit['_source']['element_id']
+                # Make GET request for each hit and return the URL associated with the applicable hit
+                async with session.get(f"https://orn.openstax.org/orn/book:page/{book_uuid}:{fixed_page_uuid}.json") as resp:
+                    page_data = await resp.json()
+                    page_url_main = page_data['urls']['main']
+                    appended_url = f"{page_url_main}#{element_uuid}"
+                    search_query_with_url = {
+                        "search_score": search_score,
+                        "search_query": search_query,
+                        "url": appended_url
+                    }
+                    ordered_urls.append(search_query_with_url)
+
+        sorted_list = sorted(ordered_urls, key=lambda search_data: search_data['search_query'])
+        return sorted_list
+
+
 @app.post("/match")
 async def perform_match(match_request: MatchRequest) -> MatchResponse:
     # TODO: Implement handler
