@@ -8,6 +8,7 @@ from requests import get
 from functools import cache
 import logging
 from openai import OpenAI
+
 client = OpenAI()
 
 logger = logging.getLogger(__name__)
@@ -128,7 +129,8 @@ async def process_search_queries(search_queries, books):
 
 
 def search_responses_to_urls(search_responses):
-    unsorted_urls = []
+    unsorted_hits = []
+    sorted_hit_urls = []
 
     for response in search_responses:
         book_data = BOOKS_BY_SLUG[response['book']]
@@ -148,16 +150,19 @@ def search_responses_to_urls(search_responses):
                 "hit_query": search_query,
                 "hit_url": appended_url_element_id
             }
-            unsorted_urls.append(hit_data)
+            unsorted_hits.append(hit_data)
 
-    sorted_list = sorted(unsorted_urls,
-                         key=lambda hit_data: hit_data['hit_query'])
-    return sorted_list
+    hits_sorted_by_hit_query = sorted(unsorted_hits,
+                                      key=lambda
+                                      hit_data: hit_data['hit_query'])
+    for hit in hits_sorted_by_hit_query:
+        sorted_hit_urls.append(hit['hit_url'])
+    return sorted_hit_urls
 
 
 @cache
 def get_book_page_data(book_uuid, partitioned_page_uuid):
-    url = (f"https://orn.openstax.org/orn/,"
+    url = (f"https://orn.openstax.org/orn/"
            f"book:page/{book_uuid}:{partitioned_page_uuid}.json")
     response = get(url)
     return response.json()
@@ -165,8 +170,13 @@ def get_book_page_data(book_uuid, partitioned_page_uuid):
 
 @app.post("/match")
 async def perform_match(match_request: MatchRequest) -> MatchResponse:
-    # TODO: Implement handler
+    model = match_request.model
+    text = match_request.text
+    books = match_request.books
+    search_queries = await generate_search_queries(client, model, text)
+    search_responses = await process_search_queries(search_queries, books)
+    sorted_urls = search_responses_to_urls(search_responses)
 
     return MatchResponse(
-        urls=[]
+        urls=sorted_urls
     )
