@@ -31,7 +31,7 @@ const StyledListItem = styled.li`
 
 const CenteredHeading = styled.h2`
   text-align: center;
-`;
+`
 
 
 

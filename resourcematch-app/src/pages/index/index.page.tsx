@@ -25,7 +25,7 @@ function Page() {
   ]
   const handleSubmit = async (input: string): Promise<void> => {
     setResponses([])
-    const urls: string[] = await callMatchApi(input) 
+    const urls: string[] = await callMatchApi(input)
     setResponses(urls)
   }
 

@@ -8,7 +8,7 @@ export interface Book {
 
 const StyledBookSelectionWrapper = styled.div`
   padding: 20px; 
-`;
+`
 
 const StyledSelect = styled.select`
   width: 100%;
@@ -19,7 +19,7 @@ const StyledSelect = styled.select`
   margin-top: 5px;
   justify-content: center;
 
-`;
+`
 
 
 interface BookSelectionProps {
