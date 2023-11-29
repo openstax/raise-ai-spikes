@@ -52,7 +52,7 @@ app.add_middleware(
 
 
 class MatchRequest(BaseModel):
-    model: Literal["gpt-3.5-turbo", "gpt-4"]
+    model: Literal["gpt-3.5-turbo-1106", "gpt-4-1106"]
     books: List[Literal[
         "college-algebra-corequisite-support-2e",
         "world-history-volume-2",
@@ -70,8 +70,9 @@ async def generate_search_queries(openai_client, model, text):
     content = (
         "Given an input from a user, please provide a set of no more than "
         "3 search phrases that would be appropriate to retrieve related "
-        "content from a search engine. Each phrase should be 3 words or less. "
-        "Return the response as a JSON string where the object has a key "
+        "content from a search engine. Each search phrase has to be 3 words "
+        "or less. Please confirm that every search term in the list is less "
+        "than 4 words. Return the response as JSON where the object has a key "
         "'search_queries' with an array of selected terms."
     )
 
@@ -87,6 +88,9 @@ async def generate_search_queries(openai_client, model, text):
             }
         ],
         model=model,
+        max_tokens=512,
+        response_format={"type": "json_object"},
+        temperature=1.0
     )
     result = json.loads(chat_completion.choices[0].message.content)
     return result['search_queries']
