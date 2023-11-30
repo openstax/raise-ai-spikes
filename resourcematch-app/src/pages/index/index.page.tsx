@@ -28,36 +28,45 @@ function Page() {
   ]
   const handleSubmit = async (input: string): Promise<void> => {
     setResponses([])
-    const urls: string[] = await callMatchApi(input)
-    if(urls.length === 0){
-      setError('No resources found')
-    }else{
-      setError('')
+    setError('')
+
+    try {
+      const urls: string[] = await callMatchApi(input)
+
+      if (urls.length === 0) {
+        setError('No resources found')
+      }
+
+      setResponses(urls)
+    } catch (error) {
+      setError(String(error))
+      setResponses([])
     }
-    setResponses(urls)
   }
 
-  const callMatchApi = async (input: string) => {
-    setError('')
-    const response = await fetch(`${ENV.RESOURCEMATCH_API}/match`,  {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo-1106',
-        books: [slug],
-        text: input
+  const callMatchApi = async (input: string): Promise<string[]> => {
+    try {
+      const response = await fetch(`${ENV.RESOURCEMATCH_API}/match`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo-1106',
+          books: [slug],
+          text: input
+        })
       })
-    })
 
-    if (!response.ok) {
-      setError('Request failed')
+      if (!response.ok) {
+        throw new Error('Request failed')
+      }
+
+      const data = await response.json()
+      return data.urls
+    } catch (error) {
       throw new Error('Request failed')
     }
-
-    const data = await response.json()
-    return data.urls
   }
 
   const onSelectBook = (slug: string) => {
