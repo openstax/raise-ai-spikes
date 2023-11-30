@@ -17,7 +17,9 @@ const InputContainer = styled.div`
 
 const Button = styled.button`
   align-items: center;
-  margin-bottom: 10px;
+  margin: 10px;
+  min-width: 95px;
+  height: 35px;
 `
 
 const InputLabel = styled.label`
@@ -41,7 +43,7 @@ const StyledErrorMessage = styled(ErrorMessage)`
 
 
 interface TextInputFormProps {
-  onSubmit: (input: string) => void
+  onSubmit: (input: string) => Promise<void>
 }
 
 export function TextInputForm({onSubmit}: TextInputFormProps)  :JSX.Element {
@@ -49,14 +51,14 @@ export function TextInputForm({onSubmit}: TextInputFormProps)  :JSX.Element {
     userInput: '',
   }
   const [isSubmitting, setIsSubmitting] = useState(false)
-
   const validate = (values: { userInput: string }) => {
     const errors: { userInput?: string } = {}
-
     if (!values.userInput.trim()) {
       errors.userInput = 'Input cannot be empty'
     }
-
+    if (values.userInput.length > 5000){
+      errors.userInput = 'Input exceeds the character limit of 5000 characters'
+    }
     return errors
   }
 

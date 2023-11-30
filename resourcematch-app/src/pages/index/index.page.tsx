@@ -4,6 +4,7 @@ import { BookSelection, Book } from '../../components/BookSelection'
 export { Page }
 import styled from 'styled-components'
 import { useState } from 'react'
+import { ENV } from '../../utils/env'
 
 const CenteredContainer = styled.div`
   display: flex;
@@ -15,6 +16,8 @@ const CenteredContainer = styled.div`
 function Page() {
   const [responses, setResponses] = useState<string[]>([]);
   const [slug, setSlug] = useState('')
+  const [noResults, setNoResults] = useState(false)
+
   const books: Book[] = [{
     friendlyName: 'Algebra',
     slug: 'college-algebra-corequisite-support-2e'
@@ -26,12 +29,17 @@ function Page() {
   const handleSubmit = async (input: string): Promise<void> => {
     setResponses([])
     const urls: string[] = await callMatchApi(input)
+    if(urls.length === 0){
+      setNoResults(true)
+    }else{
+      setNoResults(false)
+    }
     setResponses(urls)
   }
 
   const callMatchApi = async (input: string) => {
 
-    const response = await fetch('http://localhost:8888/match', {
+    const response = await fetch(`${ENV.RESOURCEMATCH_API}/match`,  {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -54,12 +62,12 @@ function Page() {
   const onSelectBook = (slug: string) => {
     setSlug(slug)
   }
-
   return (
     <CenteredContainer>
       <h1>Resourcematch</h1>
       <BookSelection books={books} onSelectBook={onSelectBook} />
       <TextInputForm onSubmit={handleSubmit} />
+      {noResults? <h2>No resources found</h2>: <></>}
       {responses.length !== 0 ? <ResponseList responses={responses} /> : <></>}
     </CenteredContainer>
   )
