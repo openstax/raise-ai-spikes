@@ -38,7 +38,7 @@ function Page() {
   }
 
   const callMatchApi = async (input: string) => {
-
+    setError('')
     const response = await fetch(`${ENV.RESOURCEMATCH_API}/match`,  {
       method: 'POST',
       headers: {
