@@ -33,13 +33,19 @@ const CenteredHeading = styled.h2`
   text-align: center;
 `
 
+const StyledList = styled.ul`
+  max-height: 500px;
+  overflow-y: auto; 
+  padding: 0;
+`
+
 
 
 export function ResponseList({ responses }: ResponseListProps): JSX.Element {
   return (
     <StyledResponseList>
       <CenteredHeading>Resources found</CenteredHeading>
-      <ul>
+      <StyledList>
         {responses.map((response, index) => (
           <StyledListItem key={index}>
             <a href={response} target="_blank" rel="noreferrer" >
@@ -47,7 +53,7 @@ export function ResponseList({ responses }: ResponseListProps): JSX.Element {
             </a>
           </StyledListItem>
         ))}
-      </ul>
+      </StyledList>
     </StyledResponseList>
   )
 }
