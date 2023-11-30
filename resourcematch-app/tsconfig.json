@@ -9,14 +9,16 @@
     "types": ["vite/client"],
     "jsx": "react-jsx",
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "noEmit": true,
   },
   "ts-node": {
     "transpileOnly": true,
     "esm": true,
     "compilerOptions": {
       "module": "Node16",
-      "moduleResolution": "Node16"
+      "moduleResolution": "Node16",
+      
     }
   }
 }
