@@ -11,7 +11,6 @@ services:
       - /code/node_modules
     ports:
       - 3000:3000
-      - 24678:24678
     networks:
       - resourcematch
   resourcematch-api:
