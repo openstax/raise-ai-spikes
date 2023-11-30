@@ -16,7 +16,7 @@ const CenteredContainer = styled.div`
 function Page() {
   const [responses, setResponses] = useState<string[]>([]);
   const [slug, setSlug] = useState('')
-  const [noResults, setNoResults] = useState(false)
+  const [error, setError] = useState('')
 
   const books: Book[] = [{
     friendlyName: 'Algebra',
@@ -30,9 +30,9 @@ function Page() {
     setResponses([])
     const urls: string[] = await callMatchApi(input)
     if(urls.length === 0){
-      setNoResults(true)
+      setError('No resources found')
     }else{
-      setNoResults(false)
+      setError('')
     }
     setResponses(urls)
   }
@@ -52,6 +52,7 @@ function Page() {
     })
 
     if (!response.ok) {
+      setError('Request failed')
       throw new Error('Request failed')
     }
 
@@ -67,7 +68,7 @@ function Page() {
       <h1>Resourcematch</h1>
       <BookSelection books={books} onSelectBook={onSelectBook} />
       <TextInputForm onSubmit={handleSubmit} />
-      {noResults? <h2>No resources found</h2>: <></>}
+      {error.length !== 0? <h2>{error}</h2>: <></>}
       {responses.length !== 0 ? <ResponseList responses={responses} /> : <></>}
     </CenteredContainer>
   )
