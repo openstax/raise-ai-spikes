@@ -140,6 +140,7 @@ def search_responses_to_urls(search_responses):
         book_data = BOOKS_BY_SLUG[response['book']]
         book_uuid = book_data['uuid']
         search_query = response['search_query']
+        print('Search query:', search_query)
         response_hits = response['search_response']['hits']['hits']
         for hit in response_hits:
             search_score = hit['_score']
@@ -160,6 +161,7 @@ def search_responses_to_urls(search_responses):
                                       key=lambda
                                       hit_data: hit_data['hit_query'])
     for hit in hits_sorted_by_hit_query:
+        print(hit['hit_query'])
         sorted_hit_urls.append(hit['hit_url'])
     return sorted_hit_urls
 
@@ -180,6 +182,14 @@ async def perform_match(match_request: MatchRequest) -> MatchResponse:
     search_queries = await generate_search_queries(client, model, text)
     search_responses = await process_search_queries(search_queries, books)
     sorted_urls = search_responses_to_urls(search_responses)
+
+    if len(sorted_urls) == 0:
+        search_queries_string = " ".join(search_queries)
+        one_word_search_queries = search_queries_string.split(" ")
+        one_word_search_query_responses = await process_search_queries(
+                                                one_word_search_queries,
+                                                books)
+        sorted_urls = search_responses_to_urls(one_word_search_query_responses)
 
     return MatchResponse(
         urls=sorted_urls
