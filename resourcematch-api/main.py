@@ -186,9 +186,21 @@ async def perform_match(match_request: MatchRequest) -> MatchResponse:
     if len(sorted_urls) == 0:
         search_queries_string = " ".join(search_queries)
         one_word_search_queries = search_queries_string.split(" ")
+
+        def filter_words_less_than_three_chars(search_query):
+            if len(search_query) > 2:
+                return True
+
+            return False
+
+        filtered_search_queries = list(filter(
+            filter_words_less_than_three_chars,
+            one_word_search_queries
+        ))
         one_word_search_query_responses = await process_search_queries(
-                                                one_word_search_queries,
-                                                books)
+            filtered_search_queries,
+            books
+        )
         sorted_urls = search_responses_to_urls(one_word_search_query_responses)
 
     return MatchResponse(
