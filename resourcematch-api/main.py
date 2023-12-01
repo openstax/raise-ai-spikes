@@ -140,7 +140,6 @@ def search_responses_to_urls(search_responses):
         book_data = BOOKS_BY_SLUG[response['book']]
         book_uuid = book_data['uuid']
         search_query = response['search_query']
-        print('Search query:', search_query)
         response_hits = response['search_response']['hits']['hits']
         for hit in response_hits:
             search_score = hit['_score']
@@ -159,9 +158,10 @@ def search_responses_to_urls(search_responses):
 
     hits_sorted_by_hit_query = sorted(unsorted_hits,
                                       key=lambda
-                                      hit_data: hit_data['hit_query'])
+                                      hit_data: hit_data['hit_query']
+                                      .lower()
+                                      .replace(".", ""))
     for hit in hits_sorted_by_hit_query:
-        print(hit['hit_query'])
         sorted_hit_urls.append(hit['hit_url'])
     return sorted_hit_urls
 
