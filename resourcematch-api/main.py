@@ -177,7 +177,10 @@ def search_responses_to_results(search_responses):
 
     hits_sorted_by_hit_query = sorted(unsorted_hits,
                                       key=lambda
-                                      hit_data: hit_data['hit_query'])
+                                      hit_data: hit_data['hit_query']
+                                      .lower()
+                                      .replace(".", ""))
+
     sorted_data = []
     for item in hits_sorted_by_hit_query:
         new_item = {key: value for key, value in item.items()
@@ -203,6 +206,28 @@ async def perform_match(match_request: MatchRequest) -> MatchResponse:
     search_queries = await generate_search_queries(client, model, text)
     search_responses = await process_search_queries(search_queries, books)
     sorted_data = search_responses_to_results(search_responses)
+
+    if len(sorted_data) == 0:
+        search_queries_string = " ".join(search_queries)
+        one_word_search_queries = search_queries_string.split(" ")
+
+        def filter_words_less_than_three_chars(search_query):
+            if len(search_query) > 2:
+                return True
+
+            return False
+
+        filtered_search_queries = list(filter(
+            filter_words_less_than_three_chars,
+            one_word_search_queries
+        ))
+        one_word_search_query_responses = await process_search_queries(
+            filtered_search_queries,
+            books
+        )
+        sorted_data = search_responses_to_results(
+            one_word_search_query_responses)
+
     return MatchResponse(
         search_results=sorted_data
     )
