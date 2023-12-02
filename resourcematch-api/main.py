@@ -7,6 +7,8 @@ import aiohttp
 from requests import get
 from functools import cache
 import logging
+import html
+
 from openai import OpenAI
 
 client = OpenAI()
@@ -62,8 +64,15 @@ class MatchRequest(BaseModel):
     text: str
 
 
+class SearchResult(BaseModel):
+    url: AnyHttpUrl
+    book_title: str
+    chapter_title: str
+    page_title: str
+
+
 class MatchResponse(BaseModel):
-    urls: List[AnyHttpUrl]
+    search_results: List[SearchResult]
 
 
 async def generate_search_queries(openai_client, model, text):
@@ -132,9 +141,12 @@ async def process_search_queries(search_queries, books):
         return aggregate_search_results
 
 
-def search_responses_to_urls(search_responses):
+def decode_html_entities(text):
+    return html.unescape(text)
+
+
+def search_responses_to_results(search_responses):
     unsorted_hits = []
-    sorted_hit_urls = []
 
     for response in search_responses:
         book_data = BOOKS_BY_SLUG[response['book']]
@@ -148,20 +160,31 @@ def search_responses_to_urls(search_responses):
             page_uuid_partition = page_uuid.partition('@')[0]
             page_data = get_book_page_data(book_uuid, page_uuid_partition)
             page_url_main = page_data['urls']['main']
+            page_book_title = decode_html_entities(page_data['book']['title'])
+            page_chapter_title = decode_html_entities(
+                                 page_data['contextTitles'][1])
+            page_title = decode_html_entities(page_data['title'])
             appended_url_element_id = f"{page_url_main}#{element_uuid}"
             hit_data = {
                 "hit_score": search_score,
                 "hit_query": search_query,
-                "hit_url": appended_url_element_id
+                "url": appended_url_element_id,
+                "book_title": page_book_title,
+                "chapter_title": page_chapter_title,
+                "page_title": page_title
             }
             unsorted_hits.append(hit_data)
 
     hits_sorted_by_hit_query = sorted(unsorted_hits,
                                       key=lambda
                                       hit_data: hit_data['hit_query'])
-    for hit in hits_sorted_by_hit_query:
-        sorted_hit_urls.append(hit['hit_url'])
-    return sorted_hit_urls
+    sorted_data = []
+    for item in hits_sorted_by_hit_query:
+        new_item = {key: value for key, value in item.items()
+                    if key not in ('hit_score', 'hit_query')}
+        sorted_data.append(new_item)
+
+    return sorted_data
 
 
 @cache
@@ -179,8 +202,7 @@ async def perform_match(match_request: MatchRequest) -> MatchResponse:
     books = match_request.books
     search_queries = await generate_search_queries(client, model, text)
     search_responses = await process_search_queries(search_queries, books)
-    sorted_urls = search_responses_to_urls(search_responses)
-
+    sorted_data = search_responses_to_results(search_responses)
     return MatchResponse(
-        urls=sorted_urls
+        search_results=sorted_data
     )

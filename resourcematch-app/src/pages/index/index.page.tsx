@@ -1,4 +1,4 @@
-import { ResponseList } from '../../components/ResponseList'
+import { ResponseList, ResourceList, Resource  } from '../../components/ResponseList'
 import { TextInputForm } from '../../components/TextInputForm'
 import { BookSelection, Book } from '../../components/BookSelection'
 export { Page }
@@ -14,7 +14,7 @@ const CenteredContainer = styled.div`
 `
 
 function Page() {
-  const [responses, setResponses] = useState<string[]>([]);
+  const [responses, setResponses] = useState<ResourceList>({ responses: [] })
   const [slug, setSlug] = useState('')
   const [error, setError] = useState('')
 
@@ -27,24 +27,24 @@ function Page() {
   }
   ]
   const handleSubmit = async (input: string): Promise<void> => {
-    setResponses([])
+    setResponses({ responses: [] })
     setError('')
 
     try {
-      const urls: string[] = await callMatchApi(input)
+      const searchResults: Resource[] = await callMatchApi(input)
 
-      if (urls.length === 0) {
+      if (searchResults.length === 0) {
         setError('No resources found')
       }
 
-      setResponses(urls)
+      setResponses({ responses: searchResults })
     } catch (error) {
       setError(String(error))
-      setResponses([])
+      setResponses({ responses: [] })
     }
   }
 
-  const callMatchApi = async (input: string): Promise<string[]> => {
+  const callMatchApi = async (input: string): Promise<Resource[]> => {
     try {
       const response = await fetch(`${ENV.RESOURCEMATCH_API}/match`, {
         method: 'POST',
@@ -63,7 +63,7 @@ function Page() {
       }
 
       const data = await response.json()
-      return data.urls
+      return data.search_results
     } catch (error) {
       throw new Error('Request failed')
     }
@@ -78,7 +78,7 @@ function Page() {
       <BookSelection books={books} onSelectBook={onSelectBook} />
       <TextInputForm onSubmit={handleSubmit} />
       {error.length !== 0? <h2>{error}</h2>: <></>}
-      {responses.length !== 0 ? <ResponseList responses={responses} /> : <></>}
+      {responses.responses.length !== 0 ? <ResponseList resources={responses} /> : <></>}
     </CenteredContainer>
   )
 }
