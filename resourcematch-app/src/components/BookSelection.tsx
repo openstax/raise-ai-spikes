@@ -32,7 +32,6 @@ export function BookSelection({ books, onSelectBook }: BookSelectionProps): JSX.
 
   const handleBookChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     const selectedSlug = event.target.value
-    console.log(selectedSlug)
     setSelectedBook(selectedSlug)
     onSelectBook(selectedSlug)
   }
