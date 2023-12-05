@@ -107,7 +107,7 @@ async def generate_search_queries(openai_client, model, text):
     return result['search_queries']
 
 
-async def process_search_queries(search_queries, subject):
+async def process_search_queries(search_queries, books):
     async with aiohttp.ClientSession() as session:
         unique_search_queries = set(search_queries)
         aggregate_search_results = []
@@ -119,7 +119,7 @@ async def process_search_queries(search_queries, subject):
                     lambda b: f"{BOOKS_BY_SLUG[b]['code_version']}"
                               f"/{BOOKS_BY_SLUG[b]['uuid']}@"
                               f"{BOOKS_BY_SLUG[b]['book_version']}",
-                              subject)),
+                              books)),
                 "index_strategy": "i1",
                 "search_strategy": "s1"
             }
