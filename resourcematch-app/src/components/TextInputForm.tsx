@@ -25,7 +25,6 @@ const Button = styled.button`
     &:disabled {
       background-color: grey;
       color: white;
-
     }
 `
 

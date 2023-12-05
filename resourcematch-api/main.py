@@ -22,6 +22,11 @@ BOOKS_BY_SLUG = {
             "code_version": "20230828.164620",
             "book_version": "32bee6a"
         },
+        "intermediate-algebra-2e": {
+            "uuid": "4664c267-cd62-4a99-8b28-1cb9b3aee347",
+            "code_version": "20231109.173216",
+            "book_version": "5f3f777"
+        },
         "world-history-volume-2": {
             "uuid": "685e3163-1032-4529-bb3a-f97a54412704",
             "code_version": "20230828.164620",
@@ -32,13 +37,24 @@ BOOKS_BY_SLUG = {
             "code_version": "20230828.164620",
             "book_version": "59e152a"
         },
-
         "biology-2e": {
             "uuid": "8d50a0af-948b-4204-a71d-4826cba765b8",
             "code_version": "20230828.164620",
             "book_version": "3bf8607"
         }
     }
+
+BOOK_SLUGS_BY_SUBJECT = {
+    "algebra": [
+        "college-algebra-corequisite-support-2e",
+        "intermediate-algebra-2e"
+    ],
+    "history": [
+        "world-history-volume-2",
+        "us-history"
+    ]
+}
+
 SEARCH_API_BASE_URL = "https://openstax.org/open-search/api/v0"
 
 
@@ -55,12 +71,7 @@ app.add_middleware(
 
 class MatchRequest(BaseModel):
     model: Literal["gpt-3.5-turbo-1106", "gpt-4-1106"]
-    books: List[Literal[
-        "college-algebra-corequisite-support-2e",
-        "world-history-volume-2",
-        "us-history",
-        "biology-2e"
-    ]]
+    subject: Literal["algebra", "history"]
     text: str
 
 
@@ -104,16 +115,17 @@ async def generate_search_queries(openai_client, model, text):
 
 async def process_search_queries(search_queries, books):
     async with aiohttp.ClientSession() as session:
-        first_book_slug = books[0]
-        book_data = BOOKS_BY_SLUG[first_book_slug]
         unique_search_queries = set(search_queries)
         aggregate_search_results = []
 
         for query in unique_search_queries:
             params = {
                 "q": query,
-                "books": (f"{book_data['code_version']}/{book_data['uuid']}"
-                          f"@{book_data['book_version']}"),
+                "books": ','.join(map(
+                    lambda b: f"{BOOKS_BY_SLUG[b]['code_version']}"
+                              f"/{BOOKS_BY_SLUG[b]['uuid']}@"
+                              f"{BOOKS_BY_SLUG[b]['book_version']}",
+                              books)),
                 "index_strategy": "i1",
                 "search_strategy": "s1"
             }
@@ -123,12 +135,16 @@ async def process_search_queries(search_queries, books):
                         params=params) as resp:
                     resp.raise_for_status()
                     search_response = await resp.json()
-                    search_info = {
-                        "book": first_book_slug,
-                        "search_query": query,
-                        "search_response": search_response
-                    }
-                    aggregate_search_results.append(search_info)
+                    response_hits = search_response['hits']['hits']
+                    for hit in response_hits:
+                        search_info = {
+                            "book": list(filter(
+                                lambda x: x[1]['uuid'] in hit['_index'],
+                                BOOKS_BY_SLUG.items()))[0][0],
+                            "search_query": query,
+                            "search_response": hit
+                        }
+                        aggregate_search_results.append(search_info)
             except aiohttp.ClientResponseError as exception:
                 logger.error(
                     'Error processing request: %s',
@@ -149,32 +165,32 @@ def search_responses_to_results(search_responses):
         book_data = BOOKS_BY_SLUG[response['book']]
         book_uuid = book_data['uuid']
         search_query = response['search_query']
-        response_hits = response['search_response']['hits']['hits']
-        for hit in response_hits:
-            search_score = hit['_score']
-            element_uuid = hit['_source']['element_id']
-            page_uuid = hit['_source']['page_id']
-            page_uuid_partition = page_uuid.partition('@')[0]
-            page_data = get_book_page_data(book_uuid, page_uuid_partition)
-            page_url_main = page_data['urls']['main']
-            page_book_title = decode_html_entities(page_data['book']['title'])
-            page_section_title = decode_html_entities(
-                                 page_data['contextTitles'][-2])
-            page_subsection_title = decode_html_entities(page_data
-                                                         ['contextTitles'][-1])
-            appended_url_element_id = f"{page_url_main}#{element_uuid}"
-            visible_content = decode_html_entities(hit['_source']
-                                                   ['visible_content'])
-            hit_data = {
-                "hit_score": search_score,
-                "hit_query": search_query,
-                "url": appended_url_element_id,
-                "book_title": page_book_title,
-                "section_title": page_section_title,
-                "subsection_title": page_subsection_title,
-                "visible_content": visible_content
-            }
-            unsorted_hits.append(hit_data)
+        response_hit = response['search_response']
+
+        search_score = response_hit['_score']
+        element_uuid = response_hit['_source']['element_id']
+        page_uuid = response_hit['_source']['page_id']
+        page_uuid_partition = page_uuid.partition('@')[0]
+        page_data = get_book_page_data(book_uuid, page_uuid_partition)
+        page_url_main = page_data['urls']['main']
+        page_book_title = decode_html_entities(page_data['book']['title'])
+        page_section_title = decode_html_entities(
+                                page_data['contextTitles'][-2])
+        page_subsection_title = decode_html_entities(page_data
+                                                        ['contextTitles'][-1])
+        appended_url_element_id = f"{page_url_main}#{element_uuid}"
+        visible_content = decode_html_entities(response_hit['_source']
+                                               ['visible_content'])
+        hit_data = {
+            "hit_score": search_score,
+            "hit_query": search_query,
+            "url": appended_url_element_id,
+            "book_title": page_book_title,
+            "section_title": page_section_title,
+            "subsection_title": page_subsection_title,
+            "visible_content": visible_content
+        }
+        unsorted_hits.append(hit_data)
 
     hits_sorted_by_hit_query = sorted(unsorted_hits,
                                       key=lambda
@@ -196,6 +212,7 @@ def get_book_page_data(book_uuid, partitioned_page_uuid):
     url = (f"https://orn.openstax.org/orn/"
            f"book:page/{book_uuid}:{partitioned_page_uuid}.json")
     response = get(url)
+    response.raise_for_status()
     return response.json()
 
 
@@ -203,9 +220,12 @@ def get_book_page_data(book_uuid, partitioned_page_uuid):
 async def perform_match(match_request: MatchRequest) -> List[MatchResponse]:
     model = match_request.model
     text = match_request.text
-    books = match_request.books
+    subject = match_request.subject
     search_queries = await generate_search_queries(client, model, text)
-    search_responses = await process_search_queries(search_queries, books)
+    search_responses = await process_search_queries(
+        search_queries,
+        BOOK_SLUGS_BY_SUBJECT[subject]
+    )
     sorted_data = search_responses_to_results(search_responses)
 
     if len(sorted_data) == 0:
@@ -224,7 +244,7 @@ async def perform_match(match_request: MatchRequest) -> List[MatchResponse]:
         ))
         one_word_search_query_responses = await process_search_queries(
             filtered_search_queries,
-            books
+            BOOK_SLUGS_BY_SUBJECT[subject]
         )
         sorted_data = search_responses_to_results(
             one_word_search_query_responses)
