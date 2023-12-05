@@ -64,16 +64,12 @@ class MatchRequest(BaseModel):
     text: str
 
 
-class SearchResult(BaseModel):
+class MatchResponse(BaseModel):
     url: AnyHttpUrl
     book_title: str
-    chapter_title: str
-    page_title: str
+    section_title: str
+    subsection_title: str
     visible_content: str
-
-
-class MatchResponse(BaseModel):
-    search_results: List[SearchResult]
 
 
 async def generate_search_queries(openai_client, model, text):
@@ -162,9 +158,10 @@ def search_responses_to_results(search_responses):
             page_data = get_book_page_data(book_uuid, page_uuid_partition)
             page_url_main = page_data['urls']['main']
             page_book_title = decode_html_entities(page_data['book']['title'])
-            page_chapter_title = decode_html_entities(
-                                 page_data['contextTitles'][1])
-            page_title = decode_html_entities(page_data['title'])
+            page_section_title = decode_html_entities(
+                                 page_data['contextTitles'][-2])
+            page_subsection_title = decode_html_entities(page_data
+                                                         ['contextTitles'][-1])
             appended_url_element_id = f"{page_url_main}#{element_uuid}"
             visible_content = decode_html_entities(hit['_source']
                                                    ['visible_content'])
@@ -173,8 +170,8 @@ def search_responses_to_results(search_responses):
                 "hit_query": search_query,
                 "url": appended_url_element_id,
                 "book_title": page_book_title,
-                "chapter_title": page_chapter_title,
-                "page_title": page_title,
+                "section_title": page_section_title,
+                "subsection_title": page_subsection_title,
                 "visible_content": visible_content
             }
             unsorted_hits.append(hit_data)
@@ -203,7 +200,7 @@ def get_book_page_data(book_uuid, partitioned_page_uuid):
 
 
 @app.post("/match")
-async def perform_match(match_request: MatchRequest) -> MatchResponse:
+async def perform_match(match_request: MatchRequest) -> List[MatchResponse]:
     model = match_request.model
     text = match_request.text
     books = match_request.books
@@ -232,6 +229,4 @@ async def perform_match(match_request: MatchRequest) -> MatchResponse:
         sorted_data = search_responses_to_results(
             one_word_search_query_responses)
 
-    return MatchResponse(
-        search_results=sorted_data
-    )
+    return sorted_data

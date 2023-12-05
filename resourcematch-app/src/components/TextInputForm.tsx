@@ -21,8 +21,12 @@ const Button = styled.button`
   min-width: 95px;
   height: 35px;
   color: black;
-  background-color: #87CEEB
-  ;
+  background-color: #87CEEB;
+    &:disabled {
+      background-color: grey;
+      color: white;
+
+    }
 `
 
 const InputLabel = styled.label`
@@ -91,7 +95,7 @@ export function TextInputForm({onSubmit}: TextInputFormProps)  :JSX.Element {
         <StyledForm onSubmit={handleSubmit}>
           <InputContainer>
             <InputLabel>Text input </InputLabel>
-            <Field name="userInput" component={FormField} />
+            <Field disabled={isSubmitting} name="userInput" component={FormField} />
             <StyledErrorMessage name="userInput" component="div" className="error" />
           </InputContainer>
 

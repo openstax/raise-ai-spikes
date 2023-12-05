@@ -64,7 +64,7 @@ function Page() {
       }
 
       const data = await response.json()
-      return data.search_results
+      return data
     } catch (error) {
       throw new Error('Request failed')
     }

@@ -11,8 +11,8 @@ interface ResponseListProps {
 export interface Resource {
   url: string
   book_title: string
-  chapter_title: string
-  page_title: string,
+  section_title: string
+  subsection_title: string,
   visible_content: string
 }
 
@@ -47,11 +47,11 @@ const StyledListItem = styled.li`
     font-weight: bold;
   }
 
-  .chapter-title {
+  .section-title {
     font-size: 18px;
     color: #666;
   }
-  .page-title {
+  .subsection-title {
     font-size: 16px;
     color: #666;
     margin-top: auto;
@@ -90,8 +90,8 @@ export function ResponseList( {resources}: ResponseListProps): JSX.Element {
         {resources.responses.map((response, index) => (
           <StyledListItem key={index}>
             <div className="book-title">{response.book_title}</div>
-            <div className="chapter-title">{response.chapter_title}</div>
-            <div className="page-title">{response.page_title}</div>
+            <div className="section-title">{response.section_title}</div>
+            <div className="subsection-title">{response.subsection_title}</div>
             <br/>
             <div className="visible-content">{response.visible_content}</div>
             <a href={response.url} className="view-more" target="_blank" rel="noreferrer" >
