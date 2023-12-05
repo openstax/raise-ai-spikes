@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 export interface Book {
   friendlyName: string
-  slug: string
+  subject: string
 }
 
 const StyledBookSelectionWrapper = styled.div`
@@ -32,6 +32,7 @@ export function BookSelection({ books, onSelectBook }: BookSelectionProps): JSX.
 
   const handleBookChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     const selectedSlug = event.target.value
+    console.log(selectedSlug)
     setSelectedBook(selectedSlug)
     onSelectBook(selectedSlug)
   }
@@ -41,7 +42,7 @@ export function BookSelection({ books, onSelectBook }: BookSelectionProps): JSX.
       <StyledSelect value={selectedBook} onChange={handleBookChange}>
         <option value="">Select a book</option>
         {books.map((book) => (
-          <option key={book.slug} value={book.slug}>
+          <option key={book.subject} value={book.subject}>
             {book.friendlyName}
           </option>
         ))}
