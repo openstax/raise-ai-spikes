@@ -15,15 +15,15 @@ const CenteredContainer = styled.div`
 
 function Page() {
   const [responses, setResponses] = useState<string[]>([]);
-  const [slug, setSlug] = useState('')
+  const [subject, setSubject] = useState('')
   const [error, setError] = useState('')
 
   const books: Book[] = [{
     friendlyName: 'Algebra',
-    slug: 'college-algebra-corequisite-support-2e'
+    subject: 'algebra'
   }, {
     friendlyName: 'History',
-    slug: 'world-history-volume-2'
+    subject: 'history'
   }
   ]
   const handleSubmit = async (input: string): Promise<void> => {
@@ -53,7 +53,7 @@ function Page() {
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo-1106',
-          books: [slug],
+          subject: subject,
           text: input
         })
       })
@@ -69,8 +69,8 @@ function Page() {
     }
   }
 
-  const onSelectBook = (slug: string) => {
-    setSlug(slug)
+  const onSelectBook = (subject: string) => {
+    setSubject(subject)
   }
   return (
     <CenteredContainer>
