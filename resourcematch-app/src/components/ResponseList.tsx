@@ -12,7 +12,8 @@ export interface Resource {
   url: string
   book_title: string
   chapter_title: string
-  page_title: string
+  page_title: string,
+  visible_content: string
 }
 
 const StyledResponseList = styled.div`
@@ -42,15 +43,16 @@ const StyledListItem = styled.li`
 
   .book-title {
     font-size: 20px;
+    color: blue;
     font-weight: bold;
   }
 
   .chapter-title {
-    font-size: 16px;
+    font-size: 18px;
     color: #666;
   }
   .page-title {
-    font-size: 14px;
+    font-size: 16px;
     color: #666;
     margin-top: auto;
   }
@@ -60,6 +62,11 @@ const StyledListItem = styled.li`
     color: #333;
     cursor: pointer;
     margin-left: auto;
+    color: blue;
+  }
+  .visible-content {
+    font-size: 12px;
+    color: black;
   }
 `
 
@@ -78,13 +85,15 @@ const StyledList = styled.ul`
 export function ResponseList( {resources}: ResponseListProps): JSX.Element {
   return (
     <StyledResponseList>
-      <CenteredHeading>Resources found</CenteredHeading>
+      <CenteredHeading>Here’s what we found</CenteredHeading>
       <StyledList>
         {resources.responses.map((response, index) => (
           <StyledListItem key={index}>
             <div className="book-title">{response.book_title}</div>
             <div className="chapter-title">{response.chapter_title}</div>
             <div className="page-title">{response.page_title}</div>
+            <br/>
+            <div className="visible-content">{response.visible_content}</div>
             <a href={response.url} className="view-more" target="_blank" rel="noreferrer" >
               View More
             </a>

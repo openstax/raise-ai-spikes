@@ -8,10 +8,11 @@ import { ENV } from '../../utils/env'
 
 const CenteredContainer = styled.div`
   display: flex;
-  width:100%;
+  min-width:100vh;
   flex-direction: column;
   align-items: center;
-`
+  background-color: #ebebeb;
+  min-height: 100vh; `
 
 function Page() {
   const [responses, setResponses] = useState<ResourceList>({ responses: [] })
@@ -74,7 +75,7 @@ function Page() {
   }
   return (
     <CenteredContainer>
-      <h1>Resourcematch</h1>
+      <h1>OpenStax AI Search</h1>
       <BookSelection books={books} onSelectBook={onSelectBook} />
       <TextInputForm onSubmit={handleSubmit} />
       {error.length !== 0? <h2>{error}</h2>: <></>}
