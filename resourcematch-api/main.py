@@ -69,6 +69,7 @@ class SearchResult(BaseModel):
     book_title: str
     chapter_title: str
     page_title: str
+    visible_content: str
 
 
 class MatchResponse(BaseModel):
@@ -165,13 +166,16 @@ def search_responses_to_results(search_responses):
                                  page_data['contextTitles'][1])
             page_title = decode_html_entities(page_data['title'])
             appended_url_element_id = f"{page_url_main}#{element_uuid}"
+            visible_content = decode_html_entities(hit['_source']
+                                                   ['visible_content'])
             hit_data = {
                 "hit_score": search_score,
                 "hit_query": search_query,
                 "url": appended_url_element_id,
                 "book_title": page_book_title,
                 "chapter_title": page_chapter_title,
-                "page_title": page_title
+                "page_title": page_title,
+                "visible_content": visible_content
             }
             unsorted_hits.append(hit_data)
 
