@@ -17,7 +17,6 @@ export interface Resource {
 }
 
 const StyledResponseList = styled.div`
-  align-items: center;
   padding: 10px;
 `
 
@@ -26,15 +25,18 @@ const StyledListItem = styled.li`
   flex-direction: column;
   padding: 10px;
   border-bottom: 1px solid #ccc;
-  width: 800px; 
+  max-width: 800px;
+  margin-bottom: 1rem;
+  margin-right: .5rem;
+  background-color: #f7f6f6; 
 
   &:hover {
-    background-color: #f7f7f7;
+    background-color: #cac6c6;
   }
 
   a {
-    text-decoration: none;
     color: #333;
+    align-self: end;
 
     &:hover {
       color: #007bff;
@@ -51,10 +53,19 @@ const StyledListItem = styled.li`
     font-size: 18px;
     color: #666;
   }
+
   .subsection-title {
     font-size: 16px;
     color: #666;
-    margin-top: auto;
+  }
+
+  .content-flex {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .content-text-spacing {
+    margin: .5rem 0
   }
 
   .view-more {
@@ -81,7 +92,6 @@ const StyledList = styled.ul`
 `
 
 
-
 export function ResponseList( {resources}: ResponseListProps): JSX.Element {
   return (
     <StyledResponseList>
@@ -89,14 +99,23 @@ export function ResponseList( {resources}: ResponseListProps): JSX.Element {
       <StyledList>
         {resources.responses.map((response, index) => (
           <StyledListItem key={index}>
-            <div className="book-title">{response.book_title}</div>
-            <div className="section-title">{response.section_title}</div>
-            <div className="subsection-title">{response.subsection_title}</div>
-            <br/>
-            <div className="visible-content">{response.visible_content}</div>
-            <a href={response.url} className="view-more" target="_blank" rel="noreferrer" >
-              View More
-            </a>
+            <div className="content-flex">
+              <div>
+                <p className="book-title content-text-spacing">{response.book_title}</p>
+              </div>
+              <div>
+                <p className="section-title content-text-spacing">{response.section_title}</p>
+              </div>
+              <div>
+                <p className="subsection-title content-text-spacing">{response.subsection_title}</p>
+              </div>
+              <div>
+                <p className="visible-content content-text-spacing">{response.visible_content}</p>
+              </div>
+              <a href={response.url} className="view-more" target="_blank" rel="noreferrer" >
+                View More
+              </a>
+            </div>
           </StyledListItem>
         ))}
       </StyledList>
