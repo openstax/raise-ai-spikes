@@ -8,7 +8,6 @@ import { ENV } from '../../utils/env'
 
 const CenteredContainer = styled.div`
   display: flex;
-  min-width:100vh;
   flex-direction: column;
   align-items: center;
   background-color: #ebebeb;
