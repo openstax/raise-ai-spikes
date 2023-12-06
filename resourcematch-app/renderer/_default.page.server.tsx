@@ -25,7 +25,7 @@ async function render(pageContext: PageContextServer) {
   // See https://vike.dev/head
   const { documentProps } = pageContext.exports
   const title = (documentProps && documentProps.title) || 'Resourcematch App'
-  const desc = (documentProps && documentProps.description) || 'Provide up to 500 characters and submit to potentially receive relevant Openstax book links'
+  const desc = (documentProps && documentProps.description) || 'Provide up to 5000 characters and submit to potentially receive relevant Openstax book links'
 
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="en">
