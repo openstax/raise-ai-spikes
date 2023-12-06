@@ -20,6 +20,12 @@ const Button = styled.button`
   margin: 10px;
   min-width: 95px;
   height: 35px;
+  color: black;
+  background-color: #87CEEB;
+    &:disabled {
+      background-color: grey;
+      color: white;
+    }
 `
 
 const InputLabel = styled.label`
@@ -30,10 +36,12 @@ const InputLabel = styled.label`
 const InputField = styled.input`
   max-width:800px;
   max-height:800px;
-  min-width: 600px;
+  min-width: 700px;
   max-height: 300px;
-  min-height: 100px;
+  min-height: 200px;
   padding: 8px;
+  border: 2px solid black;
+
 `
 
 const StyledErrorMessage = styled(ErrorMessage)`
@@ -85,13 +93,13 @@ export function TextInputForm({onSubmit}: TextInputFormProps)  :JSX.Element {
       {({ handleSubmit }) => (
         <StyledForm onSubmit={handleSubmit}>
           <InputContainer>
-            <InputLabel>Enter the input: </InputLabel>
-            <Field name="userInput" component={FormField} />
+            <InputLabel>Text input </InputLabel>
+            <Field disabled={isSubmitting} name="userInput" component={FormField} />
             <StyledErrorMessage name="userInput" component="div" className="error" />
           </InputContainer>
 
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Finding Resourses...' : 'Submit'}
+            {isSubmitting ? 'Finding Resourses...' : 'Search'}
           </Button>
         </StyledForm>
       )}

@@ -1,7 +1,19 @@
 import styled from 'styled-components'
 
+export interface ResourceList {
+  responses: Resource[]
+}
+
 interface ResponseListProps {
-  responses: string[]
+  resources: ResourceList
+}
+
+export interface Resource {
+  url: string
+  book_title: string
+  section_title: string
+  subsection_title: string,
+  visible_content: string
 }
 
 const StyledResponseList = styled.div`
@@ -10,10 +22,11 @@ const StyledResponseList = styled.div`
 `
 
 const StyledListItem = styled.li`
-  list-style: none;
-  border-bottom: 1px solid #eee;
-  padding: 8px 0;
-  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  width: 800px; 
 
   &:hover {
     background-color: #f7f7f7;
@@ -26,6 +39,34 @@ const StyledListItem = styled.li`
     &:hover {
       color: #007bff;
     }
+  }
+
+  .book-title {
+    font-size: 20px;
+    color: blue;
+    font-weight: bold;
+  }
+
+  .section-title {
+    font-size: 18px;
+    color: #666;
+  }
+  .subsection-title {
+    font-size: 16px;
+    color: #666;
+    margin-top: auto;
+  }
+
+  .view-more {
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    margin-left: auto;
+    color: blue;
+  }
+  .visible-content {
+    font-size: 12px;
+    color: black;
   }
 `
 
@@ -41,15 +82,20 @@ const StyledList = styled.ul`
 
 
 
-export function ResponseList({ responses }: ResponseListProps): JSX.Element {
+export function ResponseList( {resources}: ResponseListProps): JSX.Element {
   return (
     <StyledResponseList>
-      <CenteredHeading>Resources found</CenteredHeading>
+      <CenteredHeading>Here’s what we found</CenteredHeading>
       <StyledList>
-        {responses.map((response, index) => (
+        {resources.responses.map((response, index) => (
           <StyledListItem key={index}>
-            <a href={response} target="_blank" rel="noreferrer" >
-              {response}
+            <div className="book-title">{response.book_title}</div>
+            <div className="section-title">{response.section_title}</div>
+            <div className="subsection-title">{response.subsection_title}</div>
+            <br/>
+            <div className="visible-content">{response.visible_content}</div>
+            <a href={response.url} className="view-more" target="_blank" rel="noreferrer" >
+              View More
             </a>
           </StyledListItem>
         ))}

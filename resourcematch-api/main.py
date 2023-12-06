@@ -7,6 +7,8 @@ import aiohttp
 from requests import get
 from functools import cache
 import logging
+import html
+
 from openai import OpenAI
 
 client = OpenAI()
@@ -74,7 +76,11 @@ class MatchRequest(BaseModel):
 
 
 class MatchResponse(BaseModel):
-    urls: List[AnyHttpUrl]
+    url: AnyHttpUrl
+    book_title: str
+    section_title: str
+    subsection_title: str
+    visible_content: str
 
 
 async def generate_search_queries(openai_client, model, text):
@@ -148,9 +154,12 @@ async def process_search_queries(search_queries, books):
         return aggregate_search_results
 
 
-def search_responses_to_urls(search_responses):
+def decode_html_entities(text):
+    return html.unescape(text)
+
+
+def search_responses_to_results(search_responses):
     unsorted_hits = []
-    sorted_hit_urls = []
 
     for response in search_responses:
         book_data = BOOKS_BY_SLUG[response['book']]
@@ -164,11 +173,22 @@ def search_responses_to_urls(search_responses):
         page_uuid_partition = page_uuid.partition('@')[0]
         page_data = get_book_page_data(book_uuid, page_uuid_partition)
         page_url_main = page_data['urls']['main']
+        page_book_title = decode_html_entities(page_data['book']['title'])
+        page_section_title = decode_html_entities(
+                                page_data['contextTitles'][-2])
+        page_subsection_title = decode_html_entities(page_data
+                                                        ['contextTitles'][-1])
         appended_url_element_id = f"{page_url_main}#{element_uuid}"
+        visible_content = decode_html_entities(response_hit['_source']
+                                               ['visible_content'])
         hit_data = {
             "hit_score": search_score,
             "hit_query": search_query,
-            "hit_url": appended_url_element_id
+            "url": appended_url_element_id,
+            "book_title": page_book_title,
+            "section_title": page_section_title,
+            "subsection_title": page_subsection_title,
+            "visible_content": visible_content
         }
         unsorted_hits.append(hit_data)
 
@@ -177,9 +197,14 @@ def search_responses_to_urls(search_responses):
                                       hit_data: hit_data['hit_query']
                                       .lower()
                                       .replace(".", ""))
-    for hit in hits_sorted_by_hit_query:
-        sorted_hit_urls.append(hit['hit_url'])
-    return sorted_hit_urls
+
+    sorted_data = []
+    for item in hits_sorted_by_hit_query:
+        new_item = {key: value for key, value in item.items()
+                    if key not in ('hit_score', 'hit_query')}
+        sorted_data.append(new_item)
+
+    return sorted_data
 
 
 @cache
@@ -192,7 +217,7 @@ def get_book_page_data(book_uuid, partitioned_page_uuid):
 
 
 @app.post("/match")
-async def perform_match(match_request: MatchRequest) -> MatchResponse:
+async def perform_match(match_request: MatchRequest) -> List[MatchResponse]:
     model = match_request.model
     text = match_request.text
     subject = match_request.subject
@@ -201,9 +226,9 @@ async def perform_match(match_request: MatchRequest) -> MatchResponse:
         search_queries,
         BOOK_SLUGS_BY_SUBJECT[subject]
     )
-    sorted_urls = search_responses_to_urls(search_responses)
+    sorted_data = search_responses_to_results(search_responses)
 
-    if len(sorted_urls) == 0:
+    if len(sorted_data) == 0:
         search_queries_string = " ".join(search_queries)
         one_word_search_queries = search_queries_string.split(" ")
 
@@ -221,8 +246,7 @@ async def perform_match(match_request: MatchRequest) -> MatchResponse:
             filtered_search_queries,
             BOOK_SLUGS_BY_SUBJECT[subject]
         )
-        sorted_urls = search_responses_to_urls(one_word_search_query_responses)
+        sorted_data = search_responses_to_results(
+            one_word_search_query_responses)
 
-    return MatchResponse(
-        urls=sorted_urls
-    )
+    return sorted_data
