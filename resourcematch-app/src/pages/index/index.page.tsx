@@ -76,7 +76,7 @@ function Page() {
     <CenteredContainer>
       <h1>OpenStax AI Search</h1>
       <BookSelection books={books} onSelectBook={onSelectBook} />
-      <TextInputForm onSubmit={handleSubmit} />
+      <TextInputForm onSubmit={handleSubmit} subject={subject} />
       {error.length !== 0? <h2>{error}</h2>: <></>}
       {responses.responses.length !== 0 ? <ResponseList resources={responses} /> : <></>}
     </CenteredContainer>
