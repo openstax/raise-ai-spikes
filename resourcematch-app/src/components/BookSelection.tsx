@@ -39,7 +39,7 @@ export function BookSelection({ books, onSelectBook }: BookSelectionProps): JSX.
   return (
     <StyledBookSelectionWrapper>
       <StyledSelect value={selectedBook} onChange={handleBookChange}>
-        <option value="">Select a book</option>
+        <option value="">Select a subject</option>
         {books.map((book) => (
           <option key={book.subject} value={book.subject}>
             {book.friendlyName}

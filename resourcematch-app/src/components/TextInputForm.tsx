@@ -52,16 +52,20 @@ const StyledErrorMessage = styled(ErrorMessage)`
 
 interface TextInputFormProps {
   onSubmit: (input: string) => Promise<void>
+  subject: string
 }
 
-export function TextInputForm({onSubmit}: TextInputFormProps)  :JSX.Element {
+export function TextInputForm({onSubmit, subject}: TextInputFormProps)  :JSX.Element {
   const initialValues = {
     userInput: '',
   }
   const [isSubmitting, setIsSubmitting] = useState(false)
   const validate = (values: { userInput: string }) => {
     const errors: { userInput?: string } = {}
-    if (!values.userInput.trim()) {
+    if (subject === ''){
+      errors.userInput = 'Please select a subject'
+    }
+    else if (!values.userInput.trim()) {
       errors.userInput = 'Input cannot be empty'
     }
     if (values.userInput.length > 5000){
