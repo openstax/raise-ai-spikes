@@ -1,13 +1,13 @@
 services:
   resourcematch-app:
     build:
-      context: ./resourcematch-app
+      context: ./app
       target: ${RESOURCEMATCH_APP_TARGET:-dev}
     environment:
       - NGINX_HOST=localhost # Used when RESOURCEMATCH_APP_TARGET=deploy
       - NGINX_PORT=3000      # Used when RESOURCEMATCH_APP_TARGET=deploy
     volumes:
-      - ./resourcematch-app:/code
+      - ./app:/code
       - /code/node_modules
     ports:
       - 3000:3000
@@ -16,12 +16,12 @@ services:
       - resourcematch
   resourcematch-api:
     build:
-      context: ./resourcematch-api
+      context: ./api
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
     environment:
       - OPENAI_API_KEY
     volumes:
-      - ./resourcematch-api:/code
+      - ./api:/code
     ports:
       - 8888:80
     networks:
