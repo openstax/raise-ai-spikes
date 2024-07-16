@@ -9,3 +9,8 @@ This spike entails adopting SageMaker to deploy and invoke AI models.
 ## Resource Match
 
 This prototype is part of pilot work to help explore AI-enabled features for teachers.
+
+
+## AI content tools
+
+This directory consists of a prototyping environment and code to explore content creation / editing capabilities.
