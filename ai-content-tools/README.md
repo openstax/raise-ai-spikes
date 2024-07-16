@@ -77,7 +77,7 @@ $ docker compose exec contenttools-api python index_book.py /book-data/college-a
 $ ngrok http http://localhost:8888
 ```
 
-6. Modify `getApiEndpoint()` in `add-on/settings.js` to return the URL where your API is exposed
+6. You will see a public URL displayed in your terminal after running the previous step. Modify `getApiEndpoint()` in `add-on/settings.js` to return the public URL where your API is exposed.
 
 7. Push your code using `clasp` (skip if you enabled watch mode already):
 
@@ -86,3 +86,5 @@ $ clasp push
 ```
 
 8. Open your Apps Script project and use [these steps](https://developers.google.com/workspace/add-ons/how-tos/testing-editor-addons) to run a test deployment with a Google doc of your choice
+
+**NOTE:** When you navigate to `Extensions --> Apps Script name --> Open tools` the first time, you'll be asked to accept permissions. The tools should appear after you accept and attempt to open them again.
