@@ -27,7 +27,7 @@ def start(data):
     }
 
 
-llm = ChatOpenAI(model="gpt-3.5-turbo")
+llm = ChatOpenAI(model="gpt-4o-mini")
 
 prompt = PromptTemplate.from_template(PROMPT_TEMPLATE)
 
