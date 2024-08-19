@@ -47,7 +47,7 @@
         <option value="comparison">Comparison Word Problems</option>
       </select>
       <br><br>
-      <button class="blue" id="run-word-problem-generator">Generate word problem</button>
+      <button class="blue" id="run-content-word-problem-generator">Generate word problem</button>
     </div>
   </form>
 </div>
@@ -63,7 +63,7 @@
    */
   $(function() {
     $('#run-generator').click(runGeneration);
-    $('#run-word-problem-generator').click(runWordProblemGeneration);
+    $('#run-content-word-problem-generator').click(runContentWordProblemGeneration);
   });
 
   function runGeneration() {
@@ -85,7 +85,7 @@
             .generateContent();
   }
 
-  function runWordProblemGeneration() {
+  function runContentWordProblemGeneration() {
     this.disabled = true;
     $('#error').remove();
 
@@ -103,7 +103,7 @@
                       element.disabled = false;
                     })
             .withUserObject(this)
-            .generateWordProblemContent(problemType);
+            .generateContentWordProblemContent(problemType);
   }
 
   function insertText(text, element) {

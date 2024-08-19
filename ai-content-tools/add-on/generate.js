@@ -28,7 +28,7 @@ function generateFromText(text) {
   return resultText
 }
 
-function generateWordProblemContent(problem_type) {
+function generateContentWordProblemContent(problem_type) {
   const text = getSelectedText().join('\n');
 
   const input = {
@@ -37,7 +37,7 @@ function generateWordProblemContent(problem_type) {
   }
 
   const res = UrlFetchApp.fetch(
-    `${getApiEndpoint()}/word-problem`,
+    `${getApiEndpoint()}/content-word-problem`,
     {
       method: 'POST',
       contentType: 'application/json',
@@ -47,7 +47,7 @@ function generateWordProblemContent(problem_type) {
 
   const resJSON = JSON.parse(res.getContentText())
 
-  let resultText = resJSON.word_problem + "\n\n"
+  let resultText = resJSON.content_word_problem + "\n\n"
   resultText += `Solution:\n${resJSON.solution_work}\n\n`
 
 

@@ -17,12 +17,12 @@ You are math teacher. Given some math content and a problem type, generate a wor
 """
 
 
-class WordProblem(BaseModel):
-    word_problem: str = Field(description="generated math word problem")
+class ContentWordProblem(BaseModel):
+    content_word_problem: str = Field(description="generated math word problem")
     solution_work: str = Field(description="solution with steps to math word problem")
 
 
-default_llm = base_llm.with_structured_output(WordProblem)
+default_llm = base_llm.with_structured_output(ContentWordProblem)
 
 prompt = PromptTemplate.from_template(PROMPT_TEMPLATE)
 
