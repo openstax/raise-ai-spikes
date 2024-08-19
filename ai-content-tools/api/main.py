@@ -2,6 +2,7 @@ from typing import List, Optional
 from fastapi import FastAPI
 from pydantic import BaseModel
 import rag
+import word_problem
 import similar_problem
 from store import opensearch_vectorstore
 
@@ -18,6 +19,26 @@ class Reference(BaseModel):
 
 class RAGInput(BaseModel):
     input: str
+
+
+class WordProblem(BaseModel):
+    equation: str
+    scenario: str
+    question: str
+    answer: str
+    work: str
+
+
+class WordProblemInput(BaseModel):
+    input: str
+
+
+class WordProblemOutput(BaseModel):
+    equation: str
+    scenario: str
+    question: str
+    answer: str
+    work: str
 
 
 class RAGOutput(BaseModel):
@@ -61,6 +82,19 @@ def invoke_rag(data: RAGInput) -> RAGOutput:
     return RAGOutput(
         output=output,
         references=references,
+    )
+
+
+@app.post("/word-problem")
+def invoke_word_problem(data: WordProblemInput) -> WordProblemOutput:
+    problem = word_problem.chain.invoke({"problem": data.input})
+
+    return WordProblemOutput(
+        equation=problem.equation,
+        scenario=problem.scenario,
+        question=problem.question,
+        answer=problem.answer,
+        work=problem.work,
     )
 
 
