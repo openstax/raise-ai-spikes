@@ -28,6 +28,36 @@ function generateFromText(text) {
   return resultText
 }
 
+function generateSimilarProblemContent() {
+  const text = getSelectedText().join('\n');
+
+  const input = {
+    input: text,
+    use_concepts: true
+  }
+
+  const res = UrlFetchApp.fetch(
+    `${getApiEndpoint()}/similar-problem`,
+    {
+      method: 'POST',
+      contentType: 'application/json',
+      payload: JSON.stringify(input)
+    }
+  )
+
+  const resJSON = JSON.parse(res.getContentText())
+
+  let resultText = resJSON.similar_problem + "\n\n"
+  resultText += `Inferred math concepts:\n${resJSON.concepts}\n\n`
+  resultText += `Solution with work:\n${resJSON.solution_work}\n\n`
+
+
+  return {
+    text: text,
+    content: resultText
+  };
+}
+
 function generateWordProblemContent() {
   const text = getSelectedText().join('\n')
 

@@ -40,6 +40,7 @@
     <div class="block" id="button-bar">
       <button class="blue" id="run-generator">Generate content</button>
       <button class="green" id="run-word-problem-generator">Generate Word Problem</button>
+      <button class="blue" id="run-sim-problem-generator">Generate similar problem</button>
     </div>
   </form>
 </div>
@@ -59,7 +60,11 @@
 
   $(function(){
     $('#run-word-problem-generator').click(runWordProblemGeneration)
-  })
+  });
+
+  $(function() {
+    $('#run-sim-problem-generator').click(runSimilarProblemGeneration);
+  });
 
 
   function runGeneration() {
@@ -79,6 +84,25 @@
                     })
             .withUserObject(this)
             .generateContent();
+  }
+
+  function runSimilarProblemGeneration() {
+    this.disabled = true;
+    $('#error').remove();
+
+    google.script.run
+            .withSuccessHandler(
+                    function(result, element) {
+                      insertText(result.content);
+                      element.disabled = false;
+                    })
+            .withFailureHandler(
+                    function(msg, element) {
+                      showError(msg, $('#button-bar'));
+                      element.disabled = false;
+                    })
+            .withUserObject(this)
+            .generateSimilarProblemContent();
   }
 
   function runWordProblemGeneration() {
