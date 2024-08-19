@@ -27,3 +27,32 @@ function generateFromText(text) {
 
   return resultText
 }
+
+function generateWordProblemContent(problem_type) {
+  const text = getSelectedText().join('\n');
+
+  const input = {
+    input: text,
+    problem_type: problem_type
+  }
+
+  const res = UrlFetchApp.fetch(
+    `${getApiEndpoint()}/word-problem`,
+    {
+      method: 'POST',
+      contentType: 'application/json',
+      payload: JSON.stringify(input)
+    }
+  )
+
+  const resJSON = JSON.parse(res.getContentText())
+
+  let resultText = resJSON.word_problem + "\n\n"
+  resultText += `Solution:\n${resJSON.solution_work}\n\n`
+
+
+  return {
+    text: text,
+    content: resultText
+  };
+}

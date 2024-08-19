@@ -39,6 +39,15 @@
   <form>
     <div class="block" id="button-bar">
       <button class="blue" id="run-generator">Generate content</button>
+      <br><br>
+      <label for="problem-type">Select Problem Type:</label>
+      <select id="problem-type" class="width-100">
+        <option value="action">Action Word Problems</option>
+        <option value="relationship">Relationship Word Problems</option>
+        <option value="comparison">Comparison Word Problems</option>
+      </select>
+      <br><br>
+      <button class="blue" id="run-word-problem-generator">Generate word problem</button>
     </div>
   </form>
 </div>
@@ -54,8 +63,8 @@
    */
   $(function() {
     $('#run-generator').click(runGeneration);
+    $('#run-word-problem-generator').click(runWordProblemGeneration);
   });
-
 
   function runGeneration() {
     this.disabled = true;
@@ -74,6 +83,27 @@
                     })
             .withUserObject(this)
             .generateContent();
+  }
+
+  function runWordProblemGeneration() {
+    this.disabled = true;
+    $('#error').remove();
+
+    const problemType = $('#problem-type').val();
+
+    google.script.run
+            .withSuccessHandler(
+                    function(result, element) {
+                      insertText(result.content);
+                      element.disabled = false;
+                    })
+            .withFailureHandler(
+                    function(msg, element) {
+                      showError(msg, $('#button-bar'));
+                      element.disabled = false;
+                    })
+            .withUserObject(this)
+            .generateWordProblemContent(problemType);
   }
 
   function insertText(text, element) {
