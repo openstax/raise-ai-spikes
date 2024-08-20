@@ -37,18 +37,20 @@
 <body>
 <div class="sidebar branding-below">
   <form>
-    <div class="block" id="button-bar">
+    <div class="block" id="button-bar" style="display: flex; flex-direction: column; gap: 10px;">
       <button class="blue" id="run-generator">Generate content</button>
-      <br><br>
+      <button class="blue" id="run-word-problem-generator">Generate Word Problem</button>
+      <button class="blue" id="run-sim-problem-generator">Generate similar problem</button>
+
       <label for="problem-type">Select Problem Type:</label>
       <select id="problem-type" class="width-100">
         <option value="action">Action Word Problems</option>
         <option value="relationship">Relationship Word Problems</option>
         <option value="comparison">Comparison Word Problems</option>
       </select>
-      <br><br>
-      <button class="blue" id="run-content-word-problem-generator">Generate word problem</button>
+      <button class="blue" id="run-content-word-problem-generator">Generate Content Word Problem</button>
     </div>
+
   </form>
 </div>
 
@@ -64,6 +66,9 @@
   $(function() {
     $('#run-generator').click(runGeneration);
     $('#run-content-word-problem-generator').click(runContentWordProblemGeneration);
+    $('#run-word-problem-generator').click(runWordProblemGeneration)
+    $('#run-sim-problem-generator').click(runSimilarProblemGeneration);
+
   });
 
   function runGeneration() {
@@ -85,6 +90,45 @@
             .generateContent();
   }
 
+  function runSimilarProblemGeneration() {
+    this.disabled = true;
+    $('#error').remove();
+
+    google.script.run
+            .withSuccessHandler(
+                    function(result, element) {
+                      insertText(result.content);
+                      element.disabled = false;
+                    })
+            .withFailureHandler(
+                    function(msg, element) {
+                      showError(msg, $('#button-bar'));
+                      element.disabled = false;
+                    })
+            .withUserObject(this)
+            .generateSimilarProblemContent();
+  }
+
+  function runWordProblemGeneration() {
+    this.disabled = true
+    $('#error').remove()
+
+    google.script.run
+            .withSuccessHandler(
+                    function(result, element) {
+                      insertText(result.content);
+                      element.disabled = false;
+                    })
+            .withFailureHandler(
+                    function(msg, element) {
+                      showError(msg, $('#button-bar'));
+                      element.disabled = false;
+                    })
+            .withUserObject(this)
+            .generateWordProblemContent();
+  }
+
+
   function runContentWordProblemGeneration() {
     this.disabled = true;
     $('#error').remove();
@@ -104,6 +148,22 @@
                     })
             .withUserObject(this)
             .generateContentWordProblemContent(problemType);
+  }
+
+
+  function insertText(text, element) {
+    $('#error').remove();
+    google.script.run
+            .withSuccessHandler(
+                    function(returnSuccess, element) {
+                    })
+            .withFailureHandler(
+                    function(msg, element) {
+                      showError(msg, $('#button-bar'));
+                      element.disabled = false;
+                    })
+            .withUserObject(element)
+            .insertText(text);
   }
 
   function insertText(text, element) {
