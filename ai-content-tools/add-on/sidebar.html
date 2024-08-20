@@ -37,11 +37,20 @@
 <body>
 <div class="sidebar branding-below">
   <form>
-    <div class="block" id="button-bar">
+    <div class="block" id="button-bar" style="display: flex; flex-direction: column; gap: 10px;">
       <button class="blue" id="run-generator">Generate content</button>
-      <button class="green" id="run-word-problem-generator">Generate Word Problem</button>
+      <button class="blue" id="run-word-problem-generator">Generate Word Problem</button>
       <button class="blue" id="run-sim-problem-generator">Generate similar problem</button>
+
+      <label for="problem-type">Select Problem Type:</label>
+      <select id="problem-type" class="width-100">
+        <option value="action">Action Word Problems</option>
+        <option value="relationship">Relationship Word Problems</option>
+        <option value="comparison">Comparison Word Problems</option>
+      </select>
+      <button class="blue" id="run-content-word-problem-generator">Generate Content Word Problem</button>
     </div>
+
   </form>
 </div>
 
@@ -56,16 +65,11 @@
    */
   $(function() {
     $('#run-generator').click(runGeneration);
-  });
-
-  $(function(){
+    $('#run-content-word-problem-generator').click(runContentWordProblemGeneration);
     $('#run-word-problem-generator').click(runWordProblemGeneration)
-  });
-
-  $(function() {
     $('#run-sim-problem-generator').click(runSimilarProblemGeneration);
-  });
 
+  });
 
   function runGeneration() {
     this.disabled = true;
@@ -122,6 +126,44 @@
                     })
             .withUserObject(this)
             .generateWordProblemContent();
+  }
+
+
+  function runContentWordProblemGeneration() {
+    this.disabled = true;
+    $('#error').remove();
+
+    const problemType = $('#problem-type').val();
+
+    google.script.run
+            .withSuccessHandler(
+                    function(result, element) {
+                      insertText(result.content);
+                      element.disabled = false;
+                    })
+            .withFailureHandler(
+                    function(msg, element) {
+                      showError(msg, $('#button-bar'));
+                      element.disabled = false;
+                    })
+            .withUserObject(this)
+            .generateContentWordProblemContent(problemType);
+  }
+
+
+  function insertText(text, element) {
+    $('#error').remove();
+    google.script.run
+            .withSuccessHandler(
+                    function(returnSuccess, element) {
+                    })
+            .withFailureHandler(
+                    function(msg, element) {
+                      showError(msg, $('#button-bar'));
+                      element.disabled = false;
+                    })
+            .withUserObject(element)
+            .insertText(text);
   }
 
   function insertText(text, element) {

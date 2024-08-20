@@ -28,6 +28,7 @@ function generateFromText(text) {
   return resultText
 }
 
+
 function generateSimilarProblemContent() {
   const text = getSelectedText().join('\n');
 
@@ -88,4 +89,33 @@ function generateWordProblemContent() {
     content: resultText
   }
 
+}
+
+function generateContentWordProblemContent(problem_type) {
+  const text = getSelectedText().join('\n');
+
+  const input = {
+    input: text,
+    problem_type: problem_type
+  }
+
+  const res = UrlFetchApp.fetch(
+    `${getApiEndpoint()}/content-word-problem`,
+    {
+      method: 'POST',
+      contentType: 'application/json',
+      payload: JSON.stringify(input)
+    }
+  )
+
+  const resJSON = JSON.parse(res.getContentText())
+
+  let resultText = resJSON.content_word_problem + "\n\n"
+  resultText += `Solution:\n${resJSON.solution_work}\n\n`
+
+
+  return {
+    text: text,
+    content: resultText
+  };
 }
